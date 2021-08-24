@@ -9,6 +9,9 @@ class MyApp extends StatelessWidget {
     final wordPair = WordPair.random(); // Add this line.
     return MaterialApp(
       title: 'Welcome to Flutter',
+      theme: ThemeData(
+        primaryColor: Colors.white,
+      ),
       home: RandomWords(),
     );
   }
@@ -34,10 +37,42 @@ class _RandomWordsState extends State<RandomWords> {
     return Scaffold (
       appBar: AppBar(
         title: Text("Startup Name Generator"),
+        actions: [
+          IconButton(onPressed: _pushedSaved, icon: Icon(Icons.list)),
+        ],
       ),
+      
       body: _buildSuggestions(),
     );
 
+  }
+
+  void _pushedSaved() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          final tiles = _saved.map(
+            (WordPair pair) {
+              return ListTile(
+                title: Text(
+                  pair.asPascalCase,
+                  style: _biggerFont
+                )
+              );
+            }
+          );
+          final divided = tiles.isNotEmpty ? 
+            ListTile.divideTiles(tiles: tiles, context: context).toList() : <Widget>[];
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Saved Suggestions"),
+            ),
+            body: ListView(children: divided),
+          );
+        },
+      )
+    );
   }
 
   Widget _buildSuggestions() {
@@ -85,6 +120,15 @@ class _RandomWordsState extends State<RandomWords> {
         alreadySaved ? Icons.favorite : Icons.favorite_border,
         color: alreadySaved ? Colors.red : null,
       ),
+      onTap: () {
+        setState(() {
+          if (alreadySaved) {
+            _saved.remove(pair);
+          } else {
+            _saved.add(pair);
+          }
+        });
+      },
     );
   }
 }
